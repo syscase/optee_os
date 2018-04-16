@@ -408,6 +408,7 @@ uint32_t tee_svc_sys_return_helper(uint32_t ret, bool panic,
 {
 	if (panic) {
 		TAMSG_RAW("");
+		TAMSG_RAW("Panic address: %lx",(unsigned long) print_panic_stack);
 		TAMSG_RAW("TA panicked with code 0x%" PRIx32, panic_code);
 		print_panic_stack(regs);
 	}
