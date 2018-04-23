@@ -33,6 +33,7 @@
 #include <kernel/generic_boot.h>
 #include <kernel/tee_l2cc_mutex.h>
 #include <kernel/misc.h>
+#include <kernel/panic.h>
 #include <mm/core_mmu.h>
 
 static void tee_entry_get_shm_config(struct thread_smc_args *args)
@@ -111,8 +112,8 @@ static void tee_entry_exchange_capabilities(struct thread_smc_args *args)
 	if (dyn_shm_en)
 		args->a1 |= OPTEE_SMC_SEC_CAP_DYNAMIC_SHM;
 #endif
-
 	IMSG("Dynamic shared memory is %sabled", dyn_shm_en ? "en" : "dis");
+  IMSG("__do_panic address: %lx",(unsigned long) __do_panic);
 }
 
 static void tee_entry_disable_shm_cache(struct thread_smc_args *args)
