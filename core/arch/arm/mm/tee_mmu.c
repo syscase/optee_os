@@ -48,6 +48,7 @@
 #include <types_ext.h>
 #include <user_ta_header.h>
 #include <util.h>
+#include <tee/tee_syscase.h>
 
 #ifdef CFG_PL310
 #include <kernel/tee_l2cc_mutex.h>
@@ -793,7 +794,7 @@ TEE_Result tee_mmu_check_access_rights(const struct user_ta_ctx *utc,
 	size_t addr_incr = MIN(CORE_MMU_USER_CODE_SIZE,
 			       CORE_MMU_USER_PARAM_SIZE);
 
-	if (ADD_OVERFLOW(uaddr, len, &a))
+	if (ADD_WITH_OVERFLOW64(uaddr, len, &a))
 		return TEE_ERROR_ACCESS_DENIED;
 
 	if ((flags & TEE_MEMORY_ACCESS_NONSECURE) &&
