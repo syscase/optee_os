@@ -2900,22 +2900,33 @@ TEE_Result syscall_cryp_random_number_generate(void *buf, size_t blen)
 {
 	TEE_Result res;
 	struct tee_ta_session *sess;
+  //buf=(void *) 0x400150f0;
+  buf=(void *) 0x40f00000;
+  // does not work: 0x7fd00000
+  //             40000001
+  //           0x40001000
+  //           0x40001000
+  //             40000000 7fe00000
+  DMSG("random_number_generate(%p, %lx): get session", buf, blen);
 
 	res = tee_ta_get_current_session(&sess);
 	if (res != TEE_SUCCESS)
 		return res;
-
+  DMSG("random_number_generate: before mmu check");
 	res = tee_mmu_check_access_rights(to_user_ta_ctx(sess->ctx),
 					  TEE_MEMORY_ACCESS_WRITE |
 					  TEE_MEMORY_ACCESS_ANY_OWNER,
 					  (uaddr_t)buf, blen);
+  DMSG("random_number_generate: after mmu check");
 	if (res != TEE_SUCCESS)
 		return res;
 
+  DMSG("random_number_generate: before read");
 	res = crypto_ops.prng.read(buf, blen);
 	if (res != TEE_SUCCESS)
 		return res;
 
+  DMSG("random_number_generate: after read");
 	return res;
 }
 
