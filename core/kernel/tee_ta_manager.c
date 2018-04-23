@@ -52,6 +52,7 @@
 #include <trace.h>
 #include <utee_types.h>
 #include <util.h>
+#include <tee/tee_syscase.h>
 
 /* This mutex protects the critical section in tee_ta_init_session */
 struct mutex tee_ta_mutex = MUTEX_INITIALIZER;
@@ -342,13 +343,13 @@ static void set_invoke_timeout(struct tee_ta_session *sess,
 	if (tee_time_get_sys_time(&current_time) != TEE_SUCCESS)
 		goto infinite;
 
-	if (ADD_OVERFLOW(current_time.seconds, cancel_req_to / 1000,
+	if (ADD_WITH_OVERFLOW32(current_time.seconds, cancel_req_to / 1000,
 			 &cancel_time.seconds))
 		goto infinite;
 
 	cancel_time.millis = current_time.millis + cancel_req_to % 1000;
 	if (cancel_time.millis > 1000) {
-		if (ADD_OVERFLOW(current_time.seconds, 1,
+		if (ADD_WITH_OVERFLOW32(current_time.seconds, 1,
 				 &cancel_time.seconds))
 			goto infinite;
 
