@@ -37,6 +37,7 @@
 #include "elf_common.h"
 #include "elf32.h"
 #include "elf64.h"
+#include <tee/tee_syscase.h>
 
 struct elf_load_state {
 	bool is_32bit;
@@ -162,8 +163,8 @@ static TEE_Result copy_to(struct elf_load_state *state,
 	if (!len)
 		return TEE_SUCCESS;
 
-	if (ADD_OVERFLOW(len, dst_offs, &read_max) || read_max > dst_size ||
-	    ADD_OVERFLOW(len, offs, &data_max) || data_max > state->data_len)
+	if (ADD_WITH_OVERFLOW64(len, dst_offs, &read_max) || read_max > dst_size ||
+	    ADD_WITH_OVERFLOW64(len, offs, &data_max) || data_max > state->data_len)
 		return TEE_ERROR_SECURITY;
 
 	res = state->ta_store->read(state->ta_handle,
@@ -303,7 +304,7 @@ static TEE_Result load_head(struct elf_load_state *state, size_t head_size)
 	if (ehdr.e_phnum < 1)
 		return TEE_ERROR_BAD_FORMAT;
 
-	if (MUL_OVERFLOW(ehdr.e_phnum, ehdr.e_phentsize, &phsize))
+	if (MUL_WITH_OVERFLOW64(ehdr.e_phnum, ehdr.e_phentsize, &phsize))
 		return TEE_ERROR_SECURITY;
 
 	res = alloc_and_copy_to(&p, state, ehdr.e_phoff, phsize);
@@ -338,7 +339,7 @@ static TEE_Result load_head(struct elf_load_state *state, size_t head_size)
 		copy_phdr(&phdr, state, n);
 	} while (phdr.p_type != PT_LOAD);
 
-	if (ADD_OVERFLOW(phdr.p_vaddr, phdr.p_memsz, &state->vasize))
+	if (ADD_WITH_OVERFLOW64(phdr.p_vaddr, phdr.p_memsz, &state->vasize))
 		return TEE_ERROR_SECURITY;
 
 	/*
